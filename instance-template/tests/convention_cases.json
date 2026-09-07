@@ -1,0 +1,63 @@
+{
+  "_doc": "Batterie de convention (générique) — cas représentatifs des dimensions MÉCANIQUES de la solution (loop, gate, purpose, write-back, verify_loop, zéro divergence). Aucun domaine : les exemples sont volontairement synthétiques. Les golden numériques (C7 précision/repro) restent vides tant que l'instance n'a pas été groundée (Phase 3-6) ; le harnais ne juge alors que la mécanique C1-C6 et C8.",
+  "_conventions": [
+    "C1 loop obligatoire : livraison via livrer.sh (exit 0). Jamais `report` en dernier appel substantif.",
+    "C2 looptrace 8 steps dans l'ordre grasp→judge→sharpen→pre_vol→propose→jump→gate→learn.",
+    "C3 gate PASS (gate.verdict = PASS via g_gate_deliverable / relecture --verify-same).",
+    "C4 pertinence A5 : grasp.objective + pre_vol.purpose_ok = true.",
+    "C5 learn write-back : learn.written_back pointe vers state/logs/ROUND_LOG.md.",
+    "C6 AUCUNE divergence : jamais ask_user_question (trancher via décision verrouillée du ledger).",
+    "C7 précision/repro : total == snapshot golden, reproductible sur 2 exécutions (actif dès grounding : renseigner expect.golden_total/golden_top1).",
+    "C8 gates statiques : verify_loop.sh sur le looptrace produit = vert."
+  ],
+  "cases": [
+    {
+      "id": "aggregat_top_2025",
+      "prompt": "Quelle est la somme du CA 2025 et le classement par contrepartie ?",
+      "kind": "numeric",
+      "entity": "sample",
+      "year": 2025,
+      "expect": {
+        "golden_total": "",
+        "golden_top1": "",
+        "top": 15,
+        "note": "MÉCANIQUE : loop + gate + purpose + verify_loop (C2-C5, C8). Golden vide → C7 (précision/repro) est jugé une fois l'instance groundée (renseigner golden_total/top1 depuis la donnée réelle de l'instance)."
+      }
+    },
+    {
+      "id": "aggregat_2026_crossyear",
+      "prompt": "Quel est le CA 2026 selon le même chemin, année croisée ?",
+      "kind": "numeric",
+      "entity": "sample",
+      "year": 2026,
+      "expect": {
+        "golden_total": "",
+        "golden_top1": "",
+        "top": 15,
+        "note": "Cross-year : même chemin loop, année 2026. Golden vide → C7 inactif, mécanique C2-C5/C8 jugée."
+      }
+    },
+    {
+      "id": "livraison_texte",
+      "prompt": "Livrez une lecture qualitative de la tête de marché 2025 : concentration et interprétation.",
+      "kind": "text",
+      "entity": "sample",
+      "year": 2025,
+      "expect": {
+        "path": "reponse",
+        "note": "Qualitatif : livre via livrer.sh --message → reponse_*.json + looptrace, verify_loop vert (C8)."
+      }
+    },
+    {
+      "id": "decision_locked_sans_question",
+      "prompt": "Pour le classement 2025 par portefeuille, tranchez sans ambiguïté vers la métrique owner, sans poser de question.",
+      "kind": "text",
+      "entity": "sample",
+      "year": 2025,
+      "expect": {
+        "path": "reponse",
+        "note": "AUCUNE divergence : l'agent doit trancher seul (route vers la décision verrouillée du ledger), sans ask_user_question. Si ask_user_question → FAIL C6. Golden vide → pas de C7 ; mécanique C1-C6/C8 jugée."
+      }
+    }
+  ]
+}

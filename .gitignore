@@ -1,0 +1,13 @@
+# secrets / credentials — NEVER commit
+*.token
+*Tokecn*
+*.env
+.env*
+*secret*
+*stderr*
+*.pem
+*.key
+# local
+.DS_Store
+__pycache__/
+*.pyc

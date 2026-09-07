@@ -1,0 +1,4 @@
+{
+  "_comment": "Data-driven entity->aggregate  map for `<{{TOOL_FILE}}> report --by <entity>`. Any entity NOT listed is accepted via overrides --target/--column/--group-by/--metric/--expr. Ground the values for THIS instance (target/column/group_by/resolve).",
+  "_schema": {"target":"server aggregate target", "column":"computed C_* column", "group_by":"grouping dimension", "resolve":"id->name resolver resource"}
+}
