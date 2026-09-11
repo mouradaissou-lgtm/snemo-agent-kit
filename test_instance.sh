@@ -196,6 +196,59 @@ grep -qiE 'grossiste|BIOPURE|vecopharm|pharmacie|top_grossiste|Desktop-GDBC' "$T
   && ck "convention_cases.json domain-free" "clean" "LEAK" \
   || ck "convention_cases.json domain-free" "0" "0"
 
+# --- 10. SPEC-COMPLIANCE: the shipped spec IS the canonical spec + the born-state audit reconciles ---
+# 10a. One spec lineage: the instance ships the canonical spec byte-for-byte (no second, drifting copy).
+if [ -f "$DIR/AGENT_SPEC.md" ] && [ -f "$TARGET/AGENT_SPEC.md" ]; then
+  if cmp -s "$DIR/AGENT_SPEC.md" "$TARGET/AGENT_SPEC.md"; then
+    ck "shipped spec == canonical (no second lineage)" "0" "0"
+  else
+    ck "shipped spec == canonical" "identical" "DRIFT"
+  fi
+else
+  ck "spec present both sides" "present" "MISSING"
+fi
+# 10b. The spec-conformance audit ships born-state and RECONCILES (catalog ↔ coverage).
+if [ -s "$TARGET/tests/spec_catalog.json" ] && [ -s "$TARGET/tests/spec_coverage.json" ]; then
+  rec="$(python3 - "$TARGET/tests/spec_catalog.json" "$TARGET/tests/spec_coverage.json" <<'PY'
+import json, sys
+cat = json.load(open(sys.argv[1], encoding='utf8'))
+cov = json.load(open(sys.argv[2], encoding='utf8'))
+MAP = {'covered':'conform','partial':'partiel','todo':'todo','absent':'absent','manquant':'absent','na':'na'}
+c = {'conform':0,'partiel':0,'todo':0,'absent':0,'na':0}
+bad = []
+for f in cat.get('functions', []):
+    st = str(f.get('status','todo')).strip().lower()
+    if st not in MAP: bad.append(st); continue
+    c[MAP[st]] += 1
+tot = len(cat.get('functions', []))
+ok = (not bad) and sum(c.values()) == tot and cov.get('total') == tot \
+     and all(cov.get(k, 0) == c[k] for k in c)
+print("OK" if ok else f"BAD(catalog={c} total={tot} coverage={cov} vocab={sorted(set(bad))})")
+PY
+)"
+  [ "$rec" = "OK" ] && ck "spec catalog<->coverage reconcile" "0" "0" || ck "spec catalog<->coverage reconcile" "OK" "$rec"
+else
+  ck "spec catalog+coverage ship born-state" "present" "MISSING"
+fi
+# 10c. The cockpit /spec route has both files it reads (else it 500s on every fresh instance).
+[ -s "$TARGET/tests/spec_catalog.json" ] && [ -s "$TARGET/tests/spec_coverage.json" ] \
+  && ck "cockpit /spec route resolvable" "0" "0" || ck "cockpit /spec route resolvable" "present" "MISSING"
+# 10d. The world-class test ships as a generic skeleton + runner (G9).
+[ -s "$TARGET/tests/world_class_test.json" ] && [ -f "$TARGET/tests/world_class_run.py" ] \
+  && ck "world-class skeleton + runner ship (G9)" "0" "0" || ck "world-class skeleton + runner" "present" "MISSING"
+# 10e. SPEC ↔ INSTANCE PARITY (the derived check): every artifact AGENT_SPEC.md NAMES must exist in
+#      the GENERATED instance. A spec entry naming a file forces the template to ship it.
+if [ -f "$DIR/spec_parity.py" ]; then
+  pout="$(python3 "$DIR/spec_parity.py" --instance "$TARGET" 2>&1)"; prc=$?
+  if [ "$prc" = "0" ]; then
+    ck "spec↔instance parity ($(printf '%s' "$pout" | head -1 | sed 's/.*: //'))" "0" "0"
+  else
+    ck "spec↔instance parity" "all-resolve" "$(printf '%s' "$pout" | grep MISSING | head -3 | tr '\n' ';')"
+  fi
+else
+  ck "spec_parity.py present" "present" "MISSING"
+fi
+
 rm -rf "$TMP"
 echo "=== RESUME GENERATOR: $PASS PASS, $FAIL FAIL ==="
 [ "$FAIL" -eq 0 ]

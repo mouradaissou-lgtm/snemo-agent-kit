@@ -1,0 +1,734 @@
+{
+  "meta": {
+    "title": "Suivi du test de l'agent (spec AGENT_SPEC.md)",
+    "spec": "AGENT_SPEC.md",
+    "total": 85,
+    "vocabulary": [
+      "todo",
+      "covered",
+      "partial",
+      "absent",
+      "na"
+    ]
+  },
+  "groups": {
+    "A": {
+      "title": "Cognition & behavior",
+      "n": 7
+    },
+    "B": {
+      "title": "Memory",
+      "n": 9
+    },
+    "C": {
+      "title": "Discipline / gates",
+      "n": 26
+    },
+    "D": {
+      "title": "Data access",
+      "n": 9
+    },
+    "E": {
+      "title": "Domain grounding",
+      "n": 3
+    },
+    "F": {
+      "title": "Work tracking & process",
+      "n": 8
+    },
+    "G": {
+      "title": "Infrastructure & presentation",
+      "n": 11
+    },
+    "H": {
+      "title": "Wiring & bootstrap",
+      "n": 7
+    },
+    "I": {
+      "title": "Preset skills",
+      "n": 5
+    }
+  },
+  "functions": [
+    {
+      "id": "A1",
+      "group": "A",
+      "name": "The loop",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "A2",
+      "group": "A",
+      "name": "Depth judgment",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "A3",
+      "group": "A",
+      "name": "Context sharpening",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "A4",
+      "group": "A",
+      "name": "Persona (behavior rules)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "A5",
+      "group": "A",
+      "name": "Purpose chain",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "A6",
+      "group": "A",
+      "name": "Verdict integrity",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "A7",
+      "group": "A",
+      "name": "Voice adaptation",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B1",
+      "group": "B",
+      "name": "Doctrine ledger",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B2",
+      "group": "B",
+      "name": "Fact bank (reference ≠ source)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B3",
+      "group": "B",
+      "name": "Memory toggle",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B4",
+      "group": "B",
+      "name": "Graph store",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B5",
+      "group": "B",
+      "name": "Boot digest",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B6",
+      "group": "B",
+      "name": "Boot = read ledger ENTIRE",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B7",
+      "group": "B",
+      "name": "Contradiction protocol",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B8",
+      "group": "B",
+      "name": "Forget list",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "B9",
+      "group": "B",
+      "name": "Compaction & reminders",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C1",
+      "group": "C",
+      "name": "Calc gate (`g_calc.py`, B-126)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C2",
+      "group": "C",
+      "name": "Production gate (`production_gate.py`, B-128)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C3",
+      "group": "C",
+      "name": "Provenance gate (`provenance_gate.py` + `g_provenance.sh`, B-141)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C4",
+      "group": "C",
+      "name": "Auto-check + REDO (B-147)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C5",
+      "group": "C",
+      "name": "Delivery lock (`g_calc_delivery.sh` + `g_livraison_verif.py`, B-132)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C6",
+      "group": "C",
+      "name": "Calc container (`run_calc.py`, B-127)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C7",
+      "group": "C",
+      "name": "Schema/profile mapping (`schema_profile.py`, B-133)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C8",
+      "group": "C",
+      "name": "`[SENS]` closure (B-130)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C9",
+      "group": "C",
+      "name": "Pre-flight (`g10_preflight.sh`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C10",
+      "group": "C",
+      "name": "Sharp-context gate (`g8`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C11",
+      "group": "C",
+      "name": "Jump gate (`g9`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C12",
+      "group": "C",
+      "name": "Task-goal gate (`validate_task_goal.sh`, G5)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C13",
+      "group": "C",
+      "name": "Disposition gate (`verify_disposition.sh`, G4)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C14",
+      "group": "C",
+      "name": "Logs gate (`verify_logs.sh`, G3)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C15",
+      "group": "C",
+      "name": "Number-discipline gate (`verify_numbers.sh`, G2)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C16",
+      "group": "C",
+      "name": "Evidence gate (`verify_evidence.sh`, G1)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C17",
+      "group": "C",
+      "name": "Ledger gate (`verify_ledger.sh`, G0)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C18",
+      "group": "C",
+      "name": "Graph gate (`check_graph.sh`, G6)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C19",
+      "group": "C",
+      "name": "Architecture sync (`g11`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C20",
+      "group": "C",
+      "name": "HTML render gate (`html_crosscheck.py`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C21",
+      "group": "C",
+      "name": "Sanity gate (`sanity_gate.py`, legacy)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C22",
+      "group": "C",
+      "name": "Sens numérique (`g_controle_sens_numerique.md`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C23",
+      "group": "C",
+      "name": "Definitions resolver (`definitions_resolve.py`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C24",
+      "group": "C",
+      "name": "`_brain.sh`",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C25",
+      "group": "C",
+      "name": "Generic gate (`g_gate_deliverable.sh`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "C26",
+      "group": "C",
+      "name": "Single delivery path (`livrer.sh` + `loop.sh`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D1",
+      "group": "D",
+      "name": "Access doctrine",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D2",
+      "group": "D",
+      "name": "Whole-API reader tool",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D3",
+      "group": "D",
+      "name": "Canonical-ID resolver",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D4",
+      "group": "D",
+      "name": "Duplicate audit",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D5",
+      "group": "D",
+      "name": "Endpoint reference + endpoint map",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D6",
+      "group": "D",
+      "name": "Model guide",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D7",
+      "group": "D",
+      "name": "Fresh production",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D8",
+      "group": "D",
+      "name": "Independent confirmation",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "D9",
+      "group": "D",
+      "name": "Engine-free loop (`guard_loop.sh` + `report_map.json`)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "E1",
+      "group": "E",
+      "name": "Framework",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "E2",
+      "group": "E",
+      "name": "Data-source table",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "E3",
+      "group": "E",
+      "name": "Locked owner decisions",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F1",
+      "group": "F",
+      "name": "Task-goal system",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F2",
+      "group": "F",
+      "name": "Agenda (TODO)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F3",
+      "group": "F",
+      "name": "Projects",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F4",
+      "group": "F",
+      "name": "Decision log + queue",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F5",
+      "group": "F",
+      "name": "Round log",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F6",
+      "group": "F",
+      "name": "Workspace registry",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F7",
+      "group": "F",
+      "name": "Reminders",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "F8",
+      "group": "F",
+      "name": "Purpose file",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G1",
+      "group": "G",
+      "name": "Cockpit/dashboard",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G2",
+      "group": "G",
+      "name": "Reports/deliverables",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G3",
+      "group": "G",
+      "name": "Machinery framework + contract + persona",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G4",
+      "group": "G",
+      "name": "Telegram integration",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G5",
+      "group": "G",
+      "name": "Architecture register",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G6",
+      "group": "G",
+      "name": "Core self-check (the universal health check)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G6b",
+      "group": "G",
+      "name": "Output-shape rule (the \"no raw dump\" reply)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G6c",
+      "group": "G",
+      "name": "SPEC in the boot read-order",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G7",
+      "group": "G",
+      "name": "Conformance harness (`tests/convention.sh` + `convention_cases.json` + `convention_observe.py`)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G8",
+      "group": "G",
+      "name": "Spec-conformance audit (`tests/spec_catalog.json` + `spec_coverage.json` + tracker)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "G9",
+      "group": "G",
+      "name": "World-Class Test (`tests/world_class_test.json` + runner)",
+      "nature": "mécanique",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H1",
+      "group": "H",
+      "name": "Front door (`AGENT_CORE.md`)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H2",
+      "group": "H",
+      "name": "Workspace pointer (`AGENTS.md` + embedded digest)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H3",
+      "group": "H",
+      "name": "Read-first list",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H4",
+      "group": "H",
+      "name": "Self-architecture awareness",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H5",
+      "group": "H",
+      "name": "Preset (identity/behavior/tools/skills)",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H6",
+      "group": "H",
+      "name": "Boot stamp",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "H7",
+      "group": "H",
+      "name": "Tests",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "I1",
+      "group": "I",
+      "name": "divergence",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "I2",
+      "group": "I",
+      "name": "gdrive-read",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "I3",
+      "group": "I",
+      "name": "graph-extraction",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "I4",
+      "group": "I",
+      "name": "scheduling",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    },
+    {
+      "id": "I5",
+      "group": "I",
+      "name": "writing-style",
+      "nature": "comportement",
+      "status": "todo",
+      "proof": ""
+    }
+  ]
+}

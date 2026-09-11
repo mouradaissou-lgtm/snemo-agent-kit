@@ -31,6 +31,19 @@ const server = http.createServer((req, res) => {
     res.end(monitorJson())
     return
   }
+  // /wct : World-Class Test (G9) — squelette born-state, groundé par l'instance. Fail-soft :
+  // si le fichier est absent on renvoie un payload d'erreur explicite, jamais un crash.
+  if (url === '/wct') {
+    try {
+      const wct = fs.readFileSync(path.join(INSTANCE, 'tests', 'world_class_test.json'), 'utf8')
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(wct)
+    } catch (e) {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'world_class_test.json absent', detail: String(e) }))
+    }
+    return
+  }
   // /spec : conformité CONTRE NOTRE SPEC — catalogue des fonctions + matrice de couverture.
   if (url === '/spec') {
     try {

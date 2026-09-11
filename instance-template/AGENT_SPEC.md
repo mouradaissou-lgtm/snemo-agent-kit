@@ -267,7 +267,11 @@ Each entry: **Purpose** (why) · **Mechanism** (how) · **I/O** (artifacts) · *
 
 ### C5 — Delivery lock (`g_calc_delivery.sh` + `g_livraison_verif.py`, B-132)
 - **Purpose:** nothing ships without independent verification + green steps.
-- **Mechanism:** requires independent verification.json + last production_gate PASS (3 dims).
+- **Mechanism:** requires independent verification.json (resolved as `<artifact-stem>_verification.json`
+  first, then `verification.json`) + last production_gate PASS (3 dims). The **loop-walked verrou**
+  additionally requires a co-located `*.looptrace.json` for a numeric deliverable and re-runs
+  `verify_loop.sh` on it — a deliverable whose loop was not walked in order is refused (REDO), so the
+  gate proves the loop rather than trusting a convention.
 
 ### C6 — Calc container (`run_calc.py`, B-127)
 - **Purpose:** artifact + verification.json inseparable.
@@ -280,6 +284,10 @@ Each entry: **Purpose** (why) · **Mechanism** (how) · **I/O** (artifacts) · *
 ### C8 — `[SENS]` closure (B-130)
 - **Purpose:** high-level "does this make sense" before shipping.
 - **Mechanism:** re-state question; check magnitude/fit/coherence/edges/impossible; doubt→REDO, ambiguity→principal.
+  Mechanically, `verify_loop.sh` closes it: for a **text** deliverable (artifact carries `answer`, no `rows`)
+  the trace MUST carry `params.relecture.verdict` = `COHÉRENT|INCOHÉRENT|INCERTAIN` — INCOHÉRENT or
+  INCERTAIN is refused (REDO) and the relecteur's `note` is forwarded as the reason. A **numeric**
+  deliverable (rows) requires no relecture: the deterministic `sens_checks` cover it.
 
 ### C9 — Pre-flight (`g10_preflight.sh`)
 - **Purpose:** enumerate active verdicts touching a task (labels mode) + boot stamp.
@@ -337,7 +345,11 @@ Each entry: **Purpose** (why) · **Mechanism** (how) · **I/O** (artifacts) · *
   `verification.json` (verification{independent, verify_source}, source_ref, tool_calls) →
   `production_gate` (DISCIPLINE/RULES/HEAD-CALC/DOUBLECHECK) → `g_calc_delivery.sh`. It takes
   `--producer`, `--source-ref`, `--verify-source` (a DIFFERENT aggregation dimension than source-ref,
-  B-144), `--verify`, `--tool-calls`. It refuses a circular verify_source == source_ref (B-144).
+  B-144), `--verify`, `--tool-calls`, and forwards the optional `--rules <rules.json>` (declared
+  per-entity control) and `--source-total <float>` (the independent total the DOUBLECHECK reconciles
+  against, with a `--limit`-truncation tolerance) straight through to `production_gate.py`. It refuses
+  a circular verify_source == source_ref (B-144), and `--verify-same` marks a legitimate RELECTURE of
+  the same source (stability) rather than a re-scan.
 - **I/O:** producer → artifact + verification.json → DELIVERY PASS / REDO.
 - **Composes:** C6 (run_calc), C2 (production_gate), C5 (delivery lock), C4 (auto-check + REDO);
   A1 (loop, GATE step).
@@ -504,24 +516,31 @@ Each entry: **Purpose** (why) · **Mechanism** (how) · **I/O** (artifacts) · *
 
 ---
 
-## G. Infrastructure & presentation (9)
+## G. Infrastructure & presentation (11)
 
 ### G1 — Cockpit/dashboard
 - **Purpose:** observability — see state, gates, logs, architecture at a glance.
-- **Mechanism:** a dashboard served on the instance's port; an Architecture tab reads the register.
+- **Mechanism:** a dashboard served on the instance's port — shipped born-state as
+  `Machinery/cockpit/dashboard_server.js` (env-configurable `DSH_PORT`/`DSH_INSTANCE_DIR`) +
+  `Machinery/cockpit/dashboard.html` (reads `/monitor` + `/spec`) + `Machinery/cockpit/monitor.py`
+  (journal + `core_check.sh --json` + the coverage matrix, fail-soft); `Machinery/cockpit/observability/`
+  carries the fine-grained surface. An Architecture tab reads the register.
 - **I/O:** state/logs/register → dashboard.
-- **Composes:** G5 (register), G6 (health), S-08/S-10 surfaces — a human/agent read surface for the whole state.
+- **Composes:** G5 (register), G6 (health), G8 (coverage), S-08/S-10 surfaces — a human/agent read surface for the whole state.
 
 ### G2 — Reports/deliverables
 - **Purpose:** serve + index + package deliverables (HTML/CSV).
-- **Mechanism:** a serve script + an index generator (`update_deliverables_index.py`) + manifest/zip.
+- **Mechanism:** shipped born-state as `Machinery/07_reports/serve_deliverables.py` (+ `serve_deliverables.sh`)
+  serving the catalogue routes, `update_deliverables_index.py` (manifest → `index.html` + zip) and
+  `add_pdf_button.py` (idempotent print/PDF button); paths/ports env-configurable.
 - **I/O:** deliverables → served/indexed.
 - **Composes:** G6 (deliverables path); the JUMP/GATE output lands here as a packaged artifact.
 
 ### G3 — Machinery framework + contract + persona
 - **Purpose:** how the sandbox operates + the machinery↔agent contract + the persona reference.
-- **Mechanism:** `Machinery/02_framework/` (FRAMEWORK, AGENT_CORE_machinery_contract, PERSONA, ARCHITECTURE_PROPOSAL,
-  BRIEF_TEMPLATE, P1_MEMORY_CONTEXT_DESIGN).
+- **Mechanism:** `Machinery/02_framework/` — `AGENT_CORE_machinery_contract.md` (the machinery duties:
+  gate entry points, audit logs, workspace registry), `FRAMEWORK.md`, `PERSONA.md`,
+  `ARCHITECTURE_PROPOSAL.md`, `BRIEF_TEMPLATE.md`, `P1_MEMORY_CONTEXT_DESIGN.md`.
 - **I/O:** → the process rules the agent operates under.
 - **Composes:** A4 (persona), H1 (front door), S-07 (framework surface).
 
@@ -569,6 +588,32 @@ Each entry: **Purpose** (why) · **Mechanism** (how) · **I/O** (artifacts) · *
   C6 no divergence (never ask_user_question) · C7 precision/repro (total == golden, ×2) · C8 verify_loop green.
 - **I/O:** a live session → PASS/FAIL per case + C1..C8.
 - **Composes:** C26 (single delivery path), D9 (guard_loop), verify_loop.sh, G6 (core_check).
+
+### G8 — Spec-conformance audit (`tests/spec_catalog.json` + `spec_coverage.json` + tracker)
+- **Purpose:** answer mechanically "how much of THIS spec does this instance actually satisfy?" — the
+  audit that keeps the spec and the instance in lockstep instead of trusting a hand-written claim.
+- **Mechanism:** `tests/spec_catalog.json` carries one row per spec entry (id, group, name, nature,
+  status, proof) — the skeleton is derived from this spec by `spec_gen.sh generate`, so it cannot drift;
+  entries are promoted to `covered` **with a proof** by the instance's own tests
+  (`06_gates/update_spec_tracker.sh`). `tests/spec_coverage.json` is DERIVED from the catalog (one status
+  vocabulary, `covered|partial|absent|na` → `conform|partiel|absent|na`), so catalog and coverage always
+  reconcile. `tests/spec_tracker_server.py` (`DSH_INSTANCE_DIR`/`DSH_SPEC_PORT`) serves the catalogue +
+  live checks, and the cockpit exposes the same payload on its `/spec` route.
+- **I/O:** spec entries + test proofs → catalog → coverage + tracker/dashboard.
+- **Composes:** G6 (health), G7 (behavioral harness), H4 (self-model), I1 (skill surface).
+
+### G9 — World-Class Test (`tests/world_class_test.json` + runner)
+- **Purpose:** a layered, evidence-based verdict on whether the agent is world-class — not a single
+  smoke test but a structured suite whose failures name the missing capability.
+- **Mechanism:** `tests/world_class_test.json` declares layers and cycles: **layer 1 structure &
+  mechanics** (loop, gate, relecture, delivery lock, verification, provenance, disposition, journal,
+  exactitude) · **layer 2 architecture & conformity** (loop forced, single delivery path, text
+  relecture, dedicated engines) · **layer 3 behavior** (resistance, honesty, reasoning, meta,
+  resilience, memory, clarification, dependencies, deep reasoning). Each test carries a status; a cycle
+  groups tests across the layers and the runner reports per-layer and per-cycle results. The shipped
+  file is a **skeleton** (layers declared, cycles empty) — the items are the instance's grounding.
+- **I/O:** the running instance → per-test/per-layer/per-cycle results → a world-class verdict.
+- **Composes:** G7 (convention harness), C26 (delivery path), G6 (core_check), G8 (coverage).
 
 ---
 

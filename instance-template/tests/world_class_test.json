@@ -1,0 +1,14 @@
+{
+  "nom": "World-Class Test",
+  "version": "1.0",
+  "status": "SKELETON",
+  "_doc": "Squelette GÉNÉRIQUE du World-Class Test (G9). Le SCHÉMA est celui de la donnée réelle : `cycles.<id>.couches.<n>.{n, items[]}` + `manquants[]`. Ici les cycles sont VIDES et `manquants` est vide — l'instance les grounde en Phase 3-6. Le runner (world_class_run.py) rapporte par couche et par cycle. Aucun domaine.",
+  "couche_titres": {
+    "1": "Structure & mécanique (loop, gate, relecture, verrou de livraison, vérification, provenance, disposition, journal, exactitude)",
+    "2": "Architecture & conformité (loop forcé, chemin de livraison unique, relecture texte, moteurs dédiés)",
+    "3": "Comportement (résistance, honnêteté, raisonnement, méta, résilience, mémoire, clarification, dépendances, raisonnement profond)"
+  },
+  "cycles": {},
+  "manquants": [],
+  "total_testes": 0
+}

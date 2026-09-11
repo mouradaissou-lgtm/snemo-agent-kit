@@ -145,10 +145,102 @@ PY
   fi
 }
 
+catalog() {
+  # catalog --emit <tests/spec_catalog.json> — build the spec-conformance SKELETON from the spec.
+  # One row per spec entry: id/group/name/nature/status/proof. Every entry starts "todo" with an
+  # empty proof: the instance's own tests promote rows to "covered" (with proof) via
+  # 06_gates/update_spec_tracker.sh. Derived from the spec, so the skeleton can never drift from it.
+  local out="$DIR/spec_catalog.json"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --emit) out="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+  python - "$SPEC" "$out" <<'PY'
+import re, sys, json
+spec, out = sys.argv[1], sys.argv[2]
+txt = open(spec, encoding='utf8').read()
+group_re = re.compile(r'^## ([A-I])\. (.*?) \((\d+)\)\s*$')
+entry_re = re.compile(r'^### ([A-I])(\d+)([a-z]?)\s*—?\s*(.*)$')
+groups, funcs = {}, []
+curg = None; cur = None
+for ln in txt.splitlines():
+    gm = group_re.match(ln)
+    if gm:
+        curg = gm.group(1)
+        groups[curg] = {"title": gm.group(2), "n": int(gm.group(3))}
+        continue
+    em = entry_re.match(ln)
+    if em and curg:
+        eid = "%s%s%s" % (em.group(1), em.group(2), em.group(3))
+        cur = {"id": eid, "group": curg, "name": em.group(4).strip(),
+               "nature": "comportement", "status": "todo", "proof": ""}
+        funcs.append(cur)
+# nature: gates/discipline entries (C-group) and infra (G-group) are "mécanique"; the rest "comportement".
+for f in funcs:
+    if f["group"] in ("C", "G"):
+        f["nature"] = "mécanique"
+def sortkey(f):
+    m = re.match(r'^([A-I])(\d+)([a-z]?)$', f["id"])
+    return (m.group(1), int(m.group(2)), m.group(3) or "")
+funcs.sort(key=sortkey)
+doc = {"meta": {"title": "Suivi du test de l'agent (spec AGENT_SPEC.md)",
+                "spec": "AGENT_SPEC.md", "total": len(funcs),
+                "vocabulary": ["todo", "covered", "partial", "absent", "na"]},
+       "groups": groups, "functions": funcs}
+json.dump(doc, open(out, 'w', encoding='utf8'), ensure_ascii=False, indent=2)
+print("catalog written:", out, "|", len(funcs), "functions,", len(groups), "groups")
+PY
+}
+
+coverage() {
+  # coverage --catalog <spec_catalog.json> --emit <spec_coverage.json>
+  # DERIVE the coverage counters from the catalog (single source of truth => always reconciles).
+  # Vocabulary mapping: covered->conform, partial->partiel, todo->todo (present but NOT yet proven —
+  # kept distinct so a fresh, unaudited instance never reports conformance), absent/manquant->absent, na->na.
+  python3 - "$@" <<'PY'
+import sys, json, os
+a = sys.argv[1:]
+cat = em = None
+i = 0
+while i < len(a):
+    if a[i] == '--catalog': cat = a[i+1]; i += 2
+    elif a[i] == '--emit':  em  = a[i+1]; i += 2
+    else: i += 1
+if not cat or not em:
+    print("usage: spec_gen.sh coverage --catalog <catalog.json> --emit <coverage.json>", file=sys.stderr)
+    sys.exit(2)
+d = json.load(open(cat, encoding='utf8'))
+funcs = d.get('functions', [])
+MAP = {'covered': 'conform', 'partial': 'partiel', 'todo': 'todo',
+       'absent': 'absent', 'manquant': 'absent', 'na': 'na'}
+counts = {'conform': 0, 'partiel': 0, 'todo': 0, 'absent': 0, 'na': 0}
+unknown = []
+for f in funcs:
+    st = str(f.get('status', 'todo')).strip().lower()
+    if st not in MAP:
+        unknown.append(st); continue
+    counts[MAP[st]] += 1
+if unknown:
+    print("FAIL: unknown status vocabulary:", sorted(set(unknown)), file=sys.stderr); sys.exit(1)
+tot = sum(counts.values())
+if tot != len(funcs):
+    print(f"FAIL: categorized {tot} != {len(funcs)} functions", file=sys.stderr); sys.exit(1)
+out = {"conform": counts['conform'], "total": tot,
+       "partiel": counts['partiel'], "todo": counts['todo'],
+       "absent": counts['absent'], "na": counts['na']}
+json.dump(out, open(em, 'w', encoding='utf8'), ensure_ascii=False, indent=2)
+print(f"coverage written: {em} | {out}")
+PY
+}
+
 case "${1:-}" in
   generate) emit "${2:-$DIR/spec_index.json}" ;;
+  catalog)  catalog "${@:2}" ;;
+  coverage) coverage "${@:2}" ;;
   drift)    drift ;;
   sync)     sync ;;
   --help|-h) sed -n '1,40p' "$0" ;;
-  *) echo "usage: spec_gen.sh generate|drift|sync"; exit 1 ;;
+  *) echo "usage: spec_gen.sh generate|catalog|coverage|drift|sync"; exit 1 ;;
 esac

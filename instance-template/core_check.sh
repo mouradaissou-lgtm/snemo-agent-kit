@@ -141,6 +141,30 @@ for lf in DECISION_LOG DECISION_QUEUE ROUND_LOG; do [ -f "$ROOT/Machinery/03_log
   && ck "$g" "reports server (G2)" 0 || ck "$g" "reports server (G2)" 1
 [ -f "$ROOT/Machinery/02_framework/AGENT_CORE_machinery_contract.md" ] \
   && ck "$g" "machinery contract (G3)" 0 || ck "$g" "machinery contract (G3)" 1
+# G8/G9 born-state: spec-conformance audit (catalog+coverage reconciling) + world-class skeleton/runner.
+[ -s "$ROOT/tests/spec_catalog.json" ] && [ -s "$ROOT/tests/spec_coverage.json" ] \
+  && ck "$g" "spec-conformance audit ships (G8)" 0 || ck "$g" "spec-conformance audit (G8)" 1
+rec="$(python3 - "$ROOT/tests/spec_catalog.json" "$ROOT/tests/spec_coverage.json" <<'PY' 2>/dev/null
+import json, sys
+MAP = {'covered':'conform','partial':'partiel','todo':'todo','absent':'absent','manquant':'absent','na':'na'}
+try:
+    cat = json.load(open(sys.argv[1], encoding='utf8')); cov = json.load(open(sys.argv[2], encoding='utf8'))
+except Exception as e:
+    print("BAD(load)"); raise SystemExit
+c = {'conform':0,'partiel':0,'todo':0,'absent':0,'na':0}
+bad = []
+for f in cat.get('functions', []):
+    st = str(f.get('status','todo')).strip().lower()
+    if st not in MAP: bad.append(st); continue
+    c[MAP[st]] += 1
+tot = len(cat.get('functions', []))
+ok = (not bad) and sum(c.values()) == tot and cov.get('total') == tot and all(cov.get(k,0) == c[k] for k in c)
+print("OK" if ok else f"BAD(total={tot} cov={cov})")
+PY
+)"
+[ "$rec" = "OK" ] && ck "$g" "spec catalog<->coverage reconcile" 0 || ck "$g" "spec catalog<->coverage reconcile (${rec:-none})" 1
+[ -s "$ROOT/tests/world_class_test.json" ] && [ -f "$ROOT/tests/world_class_run.py" ] \
+  && ck "$g" "world-class skeleton+runner (G9)" 0 || ck "$g" "world-class skeleton+runner (G9)" 1
 
 # ---------------------------------------------------------------- U5 data (needs doctrine/token else NA)
 g="U5"
@@ -195,7 +219,20 @@ echo "=== VERDICT: $PASS PASS / $FAIL FAIL / $NA NA ==="
 if [ "$FAIL" -gt 0 ]; then
   echo "NOT HEALTHY — $FAIL check(s) failed:"
   printf "$g_fail" | sed 's/^/   /' | sort -u
-  if [ "$JSON" = 1 ]; then printf '{"pass":%d,"fail":%d,"na":%d,"healthy":false,"fails":%s}\n' "$PASS" "$FAIL" "$NA" "$(printf "$g_fail" | sed 's/^/"/;s|/| |;s/$/",/' | tr '\n' ' ' | sed 's/,$//')"; fi
+  if [ "$JSON" = 1 ]; then
+    # JSON emit via json.dumps: a hand-rolled sed/printf array produced INVALID JSON whenever a
+    # check name carried a quote or a second '/', breaking every consumer (cockpit, tracker).
+    FL="$(mktemp)"; printf "$g_fail" > "$FL"
+    python3 - "$FL" "$PASS" "$FAIL" "$NA" <<'PY'
+import json, sys
+rows = [l.strip() for l in open(sys.argv[1], encoding="utf8") if l.strip()]
+fails = sorted({r.replace("/", " ", 1) for r in rows})
+print(json.dumps({"pass": int(sys.argv[2]), "fail": int(sys.argv[3]),
+                  "na": int(sys.argv[4]), "healthy": False, "fails": fails},
+                 ensure_ascii=False))
+PY
+    rm -f "$FL"
+  fi
 else
   echo "HEALTHY — all checks green."
   if [ "$JSON" = 1 ]; then printf '{"pass":%d,"fail":%d,"na":%d,"healthy":true}\n' "$PASS" "$FAIL" "$NA"; fi

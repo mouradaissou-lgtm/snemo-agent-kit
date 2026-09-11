@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Suivi du test de l'agent — contre notre spec</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--border:#e5e7eb;--blue:#2563eb;--green:#16a34a;--amber:#d97706;--red:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding:24px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+.kpi{font-size:28px;font-weight:700}.kpi.ok{color:var(--green)}.kpi.warn{color:var(--amber)}.kpi.bad{color:var(--red)}.kpi.mut{color:var(--muted)}
+.kpi-lb{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0;background:var(--card)}
+.badge{font-size:11.5px;font-weight:600;white-space:nowrap;padding:2px 8px;border-radius:999px}
+.b-ok{background:#e7f6ec;color:var(--green)}.b-todo{background:#eef2f7;color:var(--muted)}
+.b-part{background:#fdf3e3;color:var(--amber)}.b-bad{background:#fdeaea;color:var(--red)}
+.sec{margin-bottom:24px}
+.meta{color:var(--muted);font-size:12px}
+.gtitle{font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+#err{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Suivi du test de l'agent — contre notre spec</h1>
+  <div class="sub">Catalogue des fonctions de <code>AGENT_SPEC.md</code> + couverture dérivée + santé de l'instance. <span id="inst" class="meta"></span></div>
+  <p id="err"></p>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="sec card">
+    <h2 style="font-size:15px;margin:0 0 10px">Santé</h2>
+    <div id="health" class="meta"></div>
+  </div>
+
+  <div class="sec">
+    <h2 style="font-size:15px;margin:0 0 6px">Catalogue (par groupe)</h2>
+    <div id="catalog"></div>
+  </div>
+</div>
+<script>
+const BADGE={conform:'b-ok',todo:'b-todo',partial:'b-part',partiel:'b-part',absent:'b-bad',na:'b-todo',covered:'b-ok'};
+async function load(){
+  const err=document.getElementById('err'); err.textContent='';
+  try{
+    const cat=await (await fetch('/catalog')).json();
+    const st=await (await fetch('/status')).json();
+    document.getElementById('inst').textContent='instance: '+(st.instance||'?');
+    const cov=st.coverage||{};
+    const k=[['Conformes',cov.conform??0,'ok'],['À prouver (todo)',cov.todo??0,'mut'],
+             ['Partiels',cov.partiel??0,'warn'],['Absents',cov.absent??0,'bad'],['Total',cov.total??0,'mut']];
+    document.getElementById('kpis').innerHTML=k.map(([lb,v,cls])=>`<div class="card"><div class="kpi ${cls}">${v}</div><div class="kpi-lb">${lb}</div></div>`).join('');
+    const cc=st.core_check||{};
+    document.getElementById('health').innerHTML = cc.healthy
+      ? `<span class="badge b-ok">HEALTHY</span> ${cc.pass} PASS / ${cc.fail} FAIL / ${cc.na} NA`
+      : `<span class="badge b-bad">${cc.error?'ERREUR':'NOT HEALTHY'}</span> ${cc.error||((cc.pass??'?')+' PASS / '+(cc.fail??'?')+' FAIL')}`;
+    const byGroup={};
+    (cat.functions||[]).forEach(f=>{(byGroup[f.group]=byGroup[f.group]||[]).push(f)});
+    let html='';
+    Object.keys(byGroup).sort().forEach(g=>{
+      const t=(cat.groups&&cat.groups[g]&&cat.groups[g].title)||'';
+      html+=`<div class="gtitle">${g} — ${t}</div><div class="card"><table><thead><tr><th>Id</th><th>Fonction</th><th>Nature</th><th>Statut</th><th>Preuve</th></tr></thead><tbody>`;
+      byGroup[g].forEach(f=>{
+        const b=BADGE[f.status]||'b-todo';
+        html+=`<tr><td class="meta">${f.id}</td><td>${f.name||''}</td><td class="meta">${f.nature||''}</td><td><span class="badge ${b}">${f.status||'todo'}</span></td><td class="meta">${f.proof||''}</td></tr>`;
+      });
+      html+='</tbody></table></div>';
+    });
+    document.getElementById('catalog').innerHTML=html;
+  }catch(e){err.textContent='Erreur: '+e.message;}
+}
+load();
+</script>
+</body>
+</html>
