@@ -109,7 +109,9 @@ if [ -f "$TARGET/tests/test_gate.sh" ]; then
 fi
 
 # --- 5. print the use-case grounding checklist -------------------------------
-cat <<EOF
+# Quoted delimiter: the block names paths in backticks, and an unquoted heredoc would run them
+# as COMMAND SUBSTITUTION (printing "No such file or directory" and dropping the text).
+cat <<'EOF'
 
 === USE-CASE GROUNDING (Phases 3–6, not scripted) ===
 Phase 3 — Ground the use case:
