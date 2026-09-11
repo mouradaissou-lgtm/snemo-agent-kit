@@ -97,6 +97,30 @@ if [ -f "$TARGET/core_check.sh" ]; then
 fi
 
 
+# --- 9b2. MOUNTABLE: the generated preset composition must satisfy every REQUIRED plugin config.
+# Some plugins declare config with no default; omitting one makes the whole preset fail to MOUNT
+# (harness: `agent-preset-invalid`) so NO session can start on it — the "preset not working"
+# defect. Required: tool-fs-search.sampleOverCapGlobResults, tool-todo.allowParallelInProgress.
+# Also asserted: the compaction group (a preset without it gives its agent no compactor at all,
+# so its context can never be compressed) and the plan-mode group.
+CY="$(find "$TARGET/preset" -name agent.cordis.yml 2>/dev/null | head -1)"
+if [ -n "$CY" ]; then
+  grep -qE 'sampleOverCapGlobResults' "$CY" \
+    && ck "preset composition: tool-fs-search required config" "0" "0" \
+    || ck "preset composition: tool-fs-search required config" "present" "MISSING (preset cannot mount)"
+  grep -qE 'allowParallelInProgress' "$CY" \
+    && ck "preset composition: tool-todo required config" "0" "0" \
+    || ck "preset composition: tool-todo required config" "present" "MISSING (preset cannot mount)"
+  grep -qE 'compaction-basic' "$CY" \
+    && ck "preset composition: compaction group" "0" "0" \
+    || ck "preset composition: compaction group" "present" "MISSING (agent can never compact)"
+  grep -qE 'dsh-plan-mode' "$CY" \
+    && ck "preset composition: plan mode" "0" "0" \
+    || ck "preset composition: plan mode" "present" "MISSING"
+else
+  ck "preset composition present" "present" "MISSING"
+fi
+
 # --- 9. spec contract: the functional spec must be coherent (generate + test the spec) --------
   bash "$DIR/spec_check.sh" >/dev/null 2>&1; ck "spec_check.sh coherent" "0" "$?"
   if bash "$DIR/spec_gen.sh" generate /tmp/spec_index_check.json >/dev/null 2>&1 && [ -s /tmp/spec_index_check.json ]; then rm -f /tmp/spec_index_check.json; ck "spec_gen generates index" "0" "0"; else ck "spec_gen generates index" "0" "1"; fi
